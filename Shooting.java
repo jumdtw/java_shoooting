@@ -44,9 +44,11 @@ public class Shooting{
         boolean keyleft = false;
         boolean keyright = false;
         Jiki jiki;
+        Tama tama;
         Thread gameLoop;
         public MainPanel(){
             jiki = new Jiki();
+            tama = new Tama(0,-1000);
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
             addKeyListener(this);
@@ -55,10 +57,10 @@ public class Shooting{
             gameLoop.start();
         }
 
-
         public void run(){
             for(;;){
                 jiki.update(keyleft,keyright);
+                if(tama.y>-20&&tama.y<500){tama.update();}
                 repaint();
                 try{
                     Thread.sleep(10);
@@ -72,6 +74,11 @@ public class Shooting{
             int keyCode = e.getKeyCode();
             if(keyCode == KeyEvent.VK_LEFT){keyleft=true;}
             if(keyCode == KeyEvent.VK_RIGHT){keyright=true;}
+            if(keyCode == KeyEvent.VK_SPACE){
+                if(tama.y<0||tama.y>500){
+                    tama = new Tama(jiki.x,jiki.y);
+                }
+            }
         } 
 
 
@@ -89,6 +96,7 @@ public class Shooting{
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
             g.drawImage(jiki.img,jiki.x,jiki.y,this);
+            g.drawImage(tama.img,tama.x,tama.y,this);
         }
     }
 
@@ -129,13 +137,13 @@ public class Shooting{
         Image img;
 
         Tama(int px,int py){
-            x = px;
-            y = py;
+            this.x = px;
+            this.y = py;
             img = Toolkit.getDefaultToolkit().getImage("./images/tama.gif");
         }
 
-        public void update(boolean keyleft,boolean keyright){
-            this.y += 10;
+        public void update(){
+            this.y -= 5;
         } 
         
         public void paint(Graphics g){
