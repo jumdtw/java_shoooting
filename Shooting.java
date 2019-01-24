@@ -43,23 +43,28 @@ public class Shooting{
         private static final int HEIGHT = 240;
         boolean keyleft = false;
         boolean keyright = false;
-        //
+        // 自機
         Jiki jiki;
-        //
+        //自機が出す弾
         Tama tama;
-        //
+        //敵の配列
         Teki[] tekis;
-        //
-        int max_enemy_num;
-        //
-        int enemy_num;
+        //敵の最大出現数
+        int max_enemy_num = 5;
+        //現在の敵の数
+        int enemy_num = 0;
         Thread gameLoop;
+        //描画時間　fps的なもの
         int sleep_time = 10;
+        //敵が画面にいる時間
         int enemy_alive_time = 1;
+        //打ち出した弾の個数
+        int shoted_tama_counter = 0;
+
+        //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
             jiki = new Jiki();
-            tama = new Tama(0,-1000);
-            max_enemy_num = 5;
+            tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
@@ -75,16 +80,18 @@ public class Shooting{
 
         public void run(){
             for(;;){
-
+                //
                 get_enemy();
                 //
                 jiki.update(keyleft,keyright);
                 //
-                if(tama.get_Tama_y()>-20&&tama.get_Tama_y()<500){tama.update();}
+                if(tama.get_Tama_y()>-90&&tama.get_Tama_y()<500){tama.update();}
                 //
                 for(int i=0;i<tekis.length;i++){
                     if(tekis[i]!=null){
                         tekis[i].update();
+                        //tekis[i].hit_judge(tama);
+                        //sleep している時間が0.01sなので*100で1sになる
                         if(tekis[i].get_enemy_time() >= sleep_time * 100 * enemy_alive_time){
                             tekis[i] = null;
                         }
@@ -103,8 +110,9 @@ public class Shooting{
             for(int i=0;i<tekis.length;i++){
                 if(tekis[i]==null){
                     Random rand = new Random();
-                    int num = rand.nextInt(10);
-                    if(num%6==0){
+                    // 0 ~ 100
+                    int num = rand.nextInt(100);
+                    if(num%1==0){
                         tekis[i] = new Teki(sleep_time);
                     }
                     
@@ -112,18 +120,20 @@ public class Shooting{
             }
         }
 
+        //
         public void keyPressed(KeyEvent e){
             int keyCode = e.getKeyCode();
             if(keyCode == KeyEvent.VK_LEFT){keyleft=true;}
             if(keyCode == KeyEvent.VK_RIGHT){keyright=true;}
             if(keyCode == KeyEvent.VK_SPACE){
                 if(tama.get_Tama_y()<0||tama.get_Tama_y()>500){
+                    shoted_tama_counter++;
                     tama = new Tama(jiki.get_jiki_x(),jiki.get_jiki_y());
                 }
             }
         } 
 
-
+        //
         public void keyReleased(KeyEvent e){
             int keyCode = e.getKeyCode();
             if(keyCode == KeyEvent.VK_LEFT){keyleft=false;}
@@ -134,32 +144,45 @@ public class Shooting{
         public void keyTyped(KeyEvent e) {
         }
 
+        //
         public void paintComponent(Graphics g) {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
-            g.drawImage(jiki.get_jiki_img(),jiki.get_jiki_x(),jiki.get_jiki_y(),this);
-            g.drawImage(tama.get_Tama_img(),tama.get_Tama_x(),tama.get_Tama_y(),this);
+            Image image = jiki.get_jiki_img();
+            int px = jiki.get_jiki_x();
+            int py = jiki.get_jiki_y();
+            int image_size = jiki.get_jiki_image_size();
+            g.drawImage(image,px,py,image_size,image_size,this);
+            image = tama.get_Tama_img();
+            px = tama.get_Tama_x();
+            py = tama.get_Tama_y();
+            image_size = tama.get_tama_img_size();
+            g.drawImage(image,px,py,image_size,image_size,this);
             for(int i=0;i<tekis.length;i++){
-                if(tekis[i]!=null){g.drawImage(tekis[i].get_enemy_img(),tekis[i].get_enemy_x(),tekis[i].get_enemy_y(),this);}
+                if(tekis[i]!=null){
+                    image = tekis[i].get_enemy_img();
+                    px = tekis[i].get_enemy_x();
+                    py = tekis[i].get_enemy_y();
+                    image_size = tekis[i].get_enemy_img_size();
+                    g.drawImage(image,px,py,image_size,image_size,this);
+                }
             }
         }
     }
 
-
+    //自機クラス
     public class Jiki extends Applet{
 
         private int x;
         private int y;
         private Image img;
-        int width;
-        int height;
+        private int jiki_img_width_height;
 
         Jiki(){
-            x = 250;
-            y = 350;
-            img = Toolkit.getDefaultToolkit().getImage("./images/jiki.gif");
-            //width = img.getWidth();
-            //height = img.getHeight();    
+            this.x = 250;
+            this.y = 400;
+            this.img = Toolkit.getDefaultToolkit().getImage("./images/test.png");
+            this.jiki_img_width_height = 40;
         }
 
         public int get_jiki_x(){
@@ -173,6 +196,10 @@ public class Shooting{
         public Image get_jiki_img(){
             return this.img;
         }
+
+        public int get_jiki_image_size(){
+            return this.jiki_img_width_height;
+        }
         
         public void update(boolean keyleft,boolean keyright){
             if(keyleft){this.x -= 5;}
@@ -183,26 +210,28 @@ public class Shooting{
         
 
         public void paint(Graphics g){
-            g.drawImage(this.img,this.x,this.y,this);
+            g.drawImage(this.img,this.x,this.y,this.jiki_img_width_height,this.jiki_img_width_height,this);
         }
     }
 
+    //敵クラス
     public class Teki extends Applet{
         private int x;
         private int y;
         private Image img;
         private int time;
+        private int teki_img_width_height;
         Random rand = new Random();
         int num = rand.nextInt(10);
         int count_time;
 
         Teki(int sleeptime){
-            x = rand.nextInt(500);
-            y = rand.nextInt(300);
-            //
+            this.x = rand.nextInt(500);
+            this.y = rand.nextInt(300);
+            this.teki_img_width_height = 80;
             time = 0;
             count_time = sleeptime;
-            img = Toolkit.getDefaultToolkit().getImage("./images/teki.gif");
+            img = Toolkit.getDefaultToolkit().getImage("./images/maru.png");
         }
 
         public int get_enemy_x(){
@@ -221,6 +250,15 @@ public class Shooting{
             return this.time;
         }
 
+        public int get_enemy_img_size(){
+            return this.teki_img_width_height;
+        }
+
+        public void hit_judge(Tama tama){
+
+        }
+
+        //画面にいる時間をここで計測している
         public void update(){
             this.time += count_time;
         }
@@ -230,19 +268,25 @@ public class Shooting{
         }
 
         public void paint(Graphics g){
-            g.drawImage(this.img,this.x,this.y,this);
+            g.drawImage(this.img,this.x,this.y,this.teki_img_width_height,this.teki_img_width_height,this);
         }
     }
 
+
+    //弾クラス
     public class Tama extends Applet{
         private int x;
         private int y;
+        private int vy;
         private Image img;
+        private int tama_img_width_height;
 
         Tama(int px,int py){
             this.x = px;
             this.y = py;
-            img = Toolkit.getDefaultToolkit().getImage("./images/tama.gif");
+            this.vy = 8;
+            this.tama_img_width_height = 40;
+            img = Toolkit.getDefaultToolkit().getImage("./images/test.png");
         }
         
         public int get_Tama_x(){
@@ -256,12 +300,17 @@ public class Shooting{
             return this.img;
         }
 
+        public int get_tama_img_size(){
+            return this.tama_img_width_height;
+        }
+
+        //画面上方向への移動はマイナス
         public void update(){
-            this.y -= 5;
+            this.y -= vy;
         } 
         
         public void paint(Graphics g){
-            g.drawImage(this.img,this.x,this.y,this);
+            g.drawImage(this.img,this.x,this.y,this.tama_img_width_height,this.tama_img_width_height,this);
         }
 
     }
