@@ -86,7 +86,6 @@ public class Shooting{
         }
 
         public void paintComponent(Graphics g) {
-            
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
             g.drawImage(jiki.img,jiki.x,jiki.y,this);
@@ -99,26 +98,50 @@ public class Shooting{
         int x;
         int y;
         Image img;
+        int width;
+        int height;
 
         Jiki(){
             x = 250;
             y = 350;
             img = Toolkit.getDefaultToolkit().getImage("./images/jiki.gif");
+            //width = img.getWidth();
+            //height = img.getHeight();    
         }
 
         
         public void update(boolean keyleft,boolean keyright){
             if(keyleft){this.x -= 5;}
             if(keyright){this.x += 5;}
-            if(x<0){x = 0;}
-            if(x>500){x = 500;}
+            if(this.x<0){x = 0;}
+            if(this.x>500){x = 500;}
         } 
         
 
         public void paint(Graphics g){
-            g.drawImage(img,x,y,this);
+            g.drawImage(this.img,this.x,this.y,this);
         }
     }
 
+    public class Tama extends Applet{
+        int x;
+        int y;
+        Image img;
+
+        Tama(int px,int py){
+            x = px;
+            y = py;
+            img = Toolkit.getDefaultToolkit().getImage("./images/tama.gif");
+        }
+
+        public void update(boolean keyleft,boolean keyright){
+            this.y += 10;
+        } 
+        
+        public void paint(Graphics g){
+            g.drawImage(this.img,this.x,this.y,this);
+        }
+
+    }
     
 }
