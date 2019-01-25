@@ -59,7 +59,7 @@ public class Shooting{
         //描画時間　fps的なもの
         int sleep_time = 10;
         //敵が画面にいる時間
-        int enemy_alive_time = 1;
+        int enemy_alive_time = 10;
         //打ち出した弾の個数
         int shoted_tama_counter = 0;
 
@@ -92,7 +92,7 @@ public class Shooting{
                 for(int i=0;i<tekis.length;i++){
                     if(tekis[i]!=null){
                         tekis[i].update();
-                        hit_judge(tekis[i]);
+                        if(tama.get_Tama_y()>0&&tama.get_Tama_y()<500){hit_judge(tekis[i]);}
                         //sleep している時間が0.01sなので*100で1sになる
                         if(tekis[i].get_enemy_time() >= sleep_time * 100 * enemy_alive_time){
                             tekis[i] = null;
@@ -124,6 +124,26 @@ public class Shooting{
 
         public void hit_judge(Teki teki){
             
+            int enemy_px = teki.get_enemy_center_x();
+            int enemy_py = teki.get_enemy_center_y();
+            int enemy_size = teki.get_enemy_img_size();
+            int tama_px = tama.get_tama_center_x();
+            int tama_py = tama.get_tama_center_y();
+            int tama_size = tama.get_tama_img_size();
+            //当たりえるxの距離 
+            int hit_xdistance = enemy_size/2 + tama_size/2;
+            //実際のxの距離
+            int xdistance = Math.abs(enemy_px-tama_px);
+            //当たりえるyの距離 
+            int hit_ydistance = enemy_size/2 + tama_size/2;
+            //実際のyの距離
+            int ydistance = Math.abs(enemy_py-tama_py);
+            if(hit_ydistance > ydistance){
+                if(hit_xdistance > xdistance){
+                    tama.remove();
+                    teki.seter_enemy_time(enemy_alive_time);
+                }
+            }
         }
 
         //
@@ -251,6 +271,8 @@ public class Shooting{
             this.teki_img_width_height = 80;
             this.x = rand.nextInt(500-teki_img_width_height);
             this.y = rand.nextInt(300);
+            this.center_px = this.x + this.teki_img_width_height/2;
+            this.center_py = this.y + this.teki_img_width_height/2;
             this.time = 0;
             this.count_time = sleeptime;
             num = rand.nextInt(3);
@@ -289,6 +311,9 @@ public class Shooting{
             return this.center_py;
         }
 
+        public void seter_enemy_time(int t){
+            this.time += t * 1000;
+        }
       
 
         //画面にいる時間をここで計測している
@@ -357,6 +382,7 @@ public class Shooting{
         //画面上方向への移動はマイナス
         public void update(){
             this.y -= vy;
+            this.center_py = this.y + this.tama_img_width_height/2;
         } 
 
         public void remove(){
