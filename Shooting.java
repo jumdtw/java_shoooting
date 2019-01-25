@@ -11,6 +11,7 @@ public class Shooting{
         Shooting shooting = new Shooting();
         GameWindow gw = shooting.new GameWindow("shooting",500,500);
         MainPanel mainpanel = shooting.new MainPanel();
+        mainpanel.setLayout(null);
         gw.add(mainpanel);
         gw.setVisible(true);
     }
@@ -45,8 +46,6 @@ public class Shooting{
         Teki[] tekis;
         //敵の最大出現数
         int max_enemy_num = 5;
-        //現在の敵の数
-        int enemy_num = 0;
         Thread gameLoop;
         //描画時間　fps的なもの
         int sleep_time = 10;
@@ -54,6 +53,13 @@ public class Shooting{
         int enemy_alive_time = 10;
         //打ち出した弾の個数
         int shoted_tama_counter = 0;
+        //スコア
+        int score;
+        //制限時間
+        int limit_time;
+        //現在までの経過時間
+        int count_time;
+
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
@@ -64,11 +70,22 @@ public class Shooting{
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            enemy_num = 0;
+            limit_time = 5;
+            count_time = 0;
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
             addKeyListener(this);
             add(startbutton);
+        }
+
+        public void init(){
+            jiki = new Jiki(-9999,-9999);
+            tama = new Tama(-1000,-1000);
+            tekis = new Teki[max_enemy_num];
+            for(int i=0;i<tekis.length;i++){
+                tekis[i] = null;
+            }
+            count_time = 0;
         }
 
         public void run(){
@@ -92,6 +109,13 @@ public class Shooting{
                     }
                 }
                 repaint();
+                count_time += sleep_time;
+                System.out.println(count_time/100);
+                if(count_time >= sleep_time * 100 * limit_time){
+                    init();
+                    end_game();
+                    gameLoop.stop();
+                }
                 try{
                     Thread.sleep(sleep_time);
                 }catch(InterruptedException e){
@@ -138,18 +162,50 @@ public class Shooting{
             }
         }
 
+        public void end_game(){
+            removeAll();
+            repaint();
+            ReturnButton b = new ReturnButton();
+            add(b);
+        }
+
         //startbuttonクラス
         public class StartButton extends JButton implements ActionListener{
 
             public StartButton(){
                 super("START");//STARTとかかれたボタンが作れる
-                setBounds(250,250,50,25);//x座標：250，ｙ座標：250の場所に幅：50，高さ：25のサイズのボタンができる
-                setSize(50,25);
+                setBounds(250-50,250-50,100,50);//x座標：250，ｙ座標：250の場所に幅：50，高さ：25のサイズのボタンができる
                 addActionListener(this);//クリックされると呼びだす
             }
             public void actionPerformed(ActionEvent e){
                 //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
                 start();
+            }
+        }
+
+        //ランキングbuttonクラス
+        public class RankButton extends JButton implements ActionListener{
+            public RankButton(){
+                super("ランキング");//ランキングとかかれたボタンが作れる
+                setBounds(250-50,250-50,100,50);
+                addActionListener(this);//クリックされると呼びだす
+            }
+            public void actionPerformed(ActionEvent e){
+                //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
+                read_ranking();
+            }
+        }
+
+        //returnbuttonクラス
+        public class ReturnButton extends JButton implements ActionListener{
+            public ReturnButton(){
+                super("スタート画面に戻る");//ランキングとかかれたボタンが作れる
+                setBounds(250-100,250-50,200,50);
+                addActionListener(this);//クリックされると呼びだす
+            }
+            public void actionPerformed(ActionEvent e){
+                //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
+                return_menu();
             }
         }
 
@@ -164,6 +220,18 @@ public class Shooting{
             }
             gameLoop = new Thread(this);
             gameLoop.start();
+        }
+
+        public void read_ranking(){
+            removeAll();
+            repaint();
+        }
+
+        public void return_menu(){
+            removeAll();
+            repaint();
+            StartButton b = new StartButton();
+            add(b);
         }
 
         //
