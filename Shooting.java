@@ -64,6 +64,10 @@ public class Shooting{
         JLabel ten;
         //背景画像
         BackGround background;
+        //文字の位置　得点と時間
+        int print_char_position = 9999;
+        //行間
+        int print_char2char = 15;
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
@@ -71,14 +75,14 @@ public class Shooting{
             jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
-            limit_point = 64;
+            limit_point = 1;
             score = 0;
             ten = new JLabel();
             background = new BackGround(1);
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            limit_time = 10;
+            limit_time = 3;
             count_time = 0;
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
@@ -92,10 +96,11 @@ public class Shooting{
             jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
+            print_char_position = -9999;
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            count_time = 0;
+     
         }
 
         public void run(){
@@ -215,7 +220,7 @@ public class Shooting{
         public class ReturnButton extends JButton implements ActionListener{
             public ReturnButton(){
                 super("スタート画面に戻る");//ランキングとかかれたボタンが作れる
-                setBounds(250-100,250-50,200,50);
+                setBounds(250-100,400,200,50);
                 addActionListener(this);//クリックされると呼びだす
             }
             public void actionPerformed(ActionEvent e){
@@ -231,9 +236,12 @@ public class Shooting{
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
             background = new BackGround(1);
+            print_char_position = 15;
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
+            count_time = 0;
+            score = 0;
             gameLoop = new Thread(this);
             gameLoop.start();
         }
@@ -305,9 +313,11 @@ public class Shooting{
                 }
             }
             //得点の表示
-            g.setColor(Color.white);
-            g.drawString("単位数: " + String.valueOf(score),10,15);
-            g.drawString("残り時間: " + String.valueOf(limit_time-count_time/1000),10,30);
+            g.setColor(Color.BLACK);
+            Font fo1 = new Font("Dialog",Font.BOLD,14);
+            g.setFont(fo1);
+            g.drawString("単位数: " + String.valueOf(score),10,print_char_position);
+            g.drawString("残り時間: " + String.valueOf(limit_time-count_time/1000),10,print_char_position+print_char2char);
         }
     }
 
@@ -318,7 +328,7 @@ public class Shooting{
         Image img;
         BackGround(int flag){
             switch(flag){
-                case 1:img =  Toolkit.getDefaultToolkit().getImage("./images/.png");break;
+                case 1:img =  Toolkit.getDefaultToolkit().getImage("./images/gamegamen.png");break;
                 case 2:img = Toolkit.getDefaultToolkit().getImage("./images/gameclear.png");break;
                 case 3:img = Toolkit.getDefaultToolkit().getImage("./images/gameover.png");break;
             }
