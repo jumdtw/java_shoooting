@@ -6,15 +6,12 @@ import javax.swing.*;
 import java.util.*;
 
 public class Shooting{
-    
+
     public static void main(String[] args){
         Shooting shooting = new Shooting();
         GameWindow gw = shooting.new GameWindow("shooting",500,500);
-        Jiki jk = shooting.new Jiki();
-        MainPanel mainpanel = shooting.new MainPanel(); 
-        StartButton startbutton = shooting.new StartButton();
-        //gw.add(mainpanel);
-        gw.add(startbutton);
+        MainPanel mainpanel = shooting.new MainPanel();
+        gw.add(mainpanel);
         gw.setVisible(true);
     }
 
@@ -33,26 +30,13 @@ public class Shooting{
 
     }
 
-    public class StartButton extends JButton implements ActionListener{
-		public StartButton()
-		{
-			super("START");//STARTとかかれたボタンが作れる
-            setBounds(250,250,50,25);//x座標：250，ｙ座標：250の場所に幅：50，高さ：25のサイズのボタンができる
-            setSize(50,25);
-			addActionListener(this);//クリックされると呼びだす
-			
-		}
-		public void actionPerformed(ActionEvent e)//アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
-		{
-			System.out.print("aaa");
-		}
-	}
-
     public class MainPanel extends JPanel implements Runnable,KeyListener{
         private static final int WIDTH = 240;
         private static final int HEIGHT = 240;
         boolean keyleft = false;
         boolean keyright = false;
+        //startbutton
+        StartButton startbutton;
         // 自機
         Jiki jiki;
         //自機が出す弾
@@ -73,7 +57,8 @@ public class Shooting{
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
-            jiki = new Jiki();
+            startbutton = new StartButton();
+            jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
             for(int i=0;i<tekis.length;i++){
@@ -83,13 +68,12 @@ public class Shooting{
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
             addKeyListener(this);
-
-            gameLoop = new Thread(this);
-            gameLoop.start();
+            add(startbutton);
         }
 
         public void run(){
             for(;;){
+
                 //ランダムに敵を出現させる
                 get_enemy();
                 //キーイベントを取得し、自機を動かす
@@ -154,6 +138,34 @@ public class Shooting{
             }
         }
 
+        //startbuttonクラス
+        public class StartButton extends JButton implements ActionListener{
+
+            public StartButton(){
+                super("START");//STARTとかかれたボタンが作れる
+                setBounds(250,250,50,25);//x座標：250，ｙ座標：250の場所に幅：50，高さ：25のサイズのボタンができる
+                setSize(50,25);
+                addActionListener(this);//クリックされると呼びだす
+            }
+            public void actionPerformed(ActionEvent e){
+                //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
+                start();
+            }
+        }
+
+        public void start(){
+            removeAll();
+            repaint();
+            jiki = new Jiki(250,400);
+            tama = new Tama(-1000,-1000);
+            tekis = new Teki[max_enemy_num];
+            for(int i=0;i<tekis.length;i++){
+                tekis[i] = null;
+            }
+            gameLoop = new Thread(this);
+            gameLoop.start();
+        }
+
         //
         public void keyPressed(KeyEvent e){
             int keyCode = e.getKeyCode();
@@ -208,6 +220,8 @@ public class Shooting{
         }
     }
 
+    
+
     //自機クラス
     public class Jiki extends Canvas{
         //この座標は画像左上なので注意
@@ -218,9 +232,9 @@ public class Shooting{
         //自機画像の大きさ
         private int jiki_img_width_height;
 
-        Jiki(){
-            this.x = 250;
-            this.y = 400;
+        Jiki(int px,int py){
+            this.x = px;
+            this.y = py;
             this.img = Toolkit.getDefaultToolkit().getImage("./images/test.png");
             this.jiki_img_width_height = 40;
         }
