@@ -1,16 +1,7 @@
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.Dimension;
-import java.awt.Color;
-import java.awt.Canvas;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 import java.util.*;
 
@@ -18,10 +9,12 @@ public class Shooting{
     
     public static void main(String[] args){
         Shooting shooting = new Shooting();
-        GameWindow gw = shooting.new GameWindow("aaa",500,500);
+        GameWindow gw = shooting.new GameWindow("shooting",500,500);
         Jiki jk = shooting.new Jiki();
         MainPanel mainpanel = shooting.new MainPanel(); 
-        gw.add(mainpanel);
+        StartButton startbutton = shooting.new StartButton();
+        //gw.add(mainpanel);
+        gw.add(startbutton);
         gw.setVisible(true);
     }
 
@@ -39,6 +32,21 @@ public class Shooting{
         }
 
     }
+
+    public class StartButton extends JButton implements ActionListener{
+		public StartButton()
+		{
+			super("START");//STARTとかかれたボタンが作れる
+            setBounds(250,250,50,25);//x座標：250，ｙ座標：250の場所に幅：50，高さ：25のサイズのボタンができる
+            setSize(50,25);
+			addActionListener(this);//クリックされると呼びだす
+			
+		}
+		public void actionPerformed(ActionEvent e)//アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
+		{
+			System.out.print("aaa");
+		}
+	}
 
     public class MainPanel extends JPanel implements Runnable,KeyListener{
         private static final int WIDTH = 240;
