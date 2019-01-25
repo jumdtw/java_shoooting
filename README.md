@@ -13,4 +13,7 @@ Javaでゲーム作りますが何か？ コード記述参考
 - http://aidiary.hatenablog.com/entry/20040918/1251373370
 
 とほほのJava入門 - とほほのWWW入門 setlayoutについて
-- http://www.tohoho-web.com/java/layout.htm
+- http://www.tohoho-web.com/java/layout.html
+
+はじめてのJava入門 文字のフォントについて
+- http://www1.bbiq.jp/takeharu/Applet15.html

@@ -38,6 +38,8 @@ public class Shooting{
         boolean keyright = false;
         //startbutton
         StartButton startbutton;
+        //rankbutton
+        RankButton rankbutton;
         // 自機
         Jiki jiki;
         //自機が出す弾
@@ -65,29 +67,38 @@ public class Shooting{
         //背景画像
         BackGround background;
         //文字の位置　得点と時間
-        int print_char_position = 9999;
+        int print_char_position=999;
         //行間
-        int print_char2char = 15;
+        int print_char2char=15;
+        //player name
+        String nickname = "Noname";
+        //成績の文字列の場所
+        int print_score_char_xpositon = 0;
+        int print_score_char_ypositon = 999;
+
+        boolean gameFlag = true;
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
             startbutton = new StartButton();
+            rankbutton = new RankButton();
             jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
             limit_point = 1;
             score = 0;
-            ten = new JLabel();
             background = new BackGround(1);
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            limit_time = 3;
+            limit_time = 10;
             count_time = 0;
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
             addKeyListener(this);
             add(startbutton);
+            add(rankbutton);
+
         }
 
 
@@ -104,7 +115,7 @@ public class Shooting{
         }
 
         public void run(){
-            for(;;){
+            while(gameFlag){
                 //ランダムに敵を出現させる
                 get_enemy();
                 //キーイベントを取得し、自機を動かす
@@ -128,7 +139,7 @@ public class Shooting{
                 if(count_time >= sleep_time * 100 * limit_time){
                     init();
                     end_game();
-                    gameLoop.stop();
+                    gameFlag = false;
                 }
                 try{
                     Thread.sleep(sleep_time);
@@ -181,8 +192,13 @@ public class Shooting{
             removeAll();
             repaint();
             if(score >= limit_point){
+                //成績発表用の文字列を表示
+                print_score_char_xpositon = 80;
+                print_score_char_ypositon = 160;
                 background = new BackGround(2);
             }else{
+                print_score_char_xpositon = 90;
+                print_score_char_ypositon = 140;
                 background = new BackGround(3);
             }
             ReturnButton b = new ReturnButton();
@@ -207,7 +223,7 @@ public class Shooting{
         public class RankButton extends JButton implements ActionListener{
             public RankButton(){
                 super("ランキング");//ランキングとかかれたボタンが作れる
-                setBounds(250-50,250-50,100,50);
+                setBounds(250-50,250+50,100,50);
                 addActionListener(this);//クリックされると呼びだす
             }
             public void actionPerformed(ActionEvent e){
@@ -242,21 +258,27 @@ public class Shooting{
             }
             count_time = 0;
             score = 0;
+            nickname = "Noname";
+            gameFlag = true;
             gameLoop = new Thread(this);
             gameLoop.start();
         }
 
         public void read_ranking(){
-            removeAll();
-            repaint();
+            //removeAll();
+            //repaint();
         }
 
         public void return_menu(){
             removeAll();
             repaint();
+            //成績発表用の文字列の場所を画面外にする
+            print_score_char_ypositon = 999;
             background = new BackGround(1);
-            StartButton b = new StartButton();
-            add(b);
+            StartButton sb = new StartButton();
+            RankButton rb = new RankButton();
+            add(sb);
+            add(rb);
         }
 
         //
@@ -313,29 +335,30 @@ public class Shooting{
                 }
             }
             //得点の表示
-            g.setColor(Color.BLACK);
             Font fo1 = new Font("Dialog",Font.BOLD,14);
             g.setFont(fo1);
             g.drawString("単位数: " + String.valueOf(score),10,print_char_position);
             g.drawString("残り時間: " + String.valueOf(limit_time-count_time/1000),10,print_char_position+print_char2char);
+            Font fo2 = new Font("Dialog",Font.BOLD,20);
+            g.setFont(fo2);
+            g.setColor(Color.yellow);
+            g.drawString(nickname + " は " +  String.valueOf(score) + "の単位を取りました",print_score_char_xpositon,print_score_char_ypositon);
         }
     }
 
 
     public class BackGround extends Canvas{
-        int x;
-        int y;
         Image img;
         BackGround(int flag){
             switch(flag){
-                case 1:img =  Toolkit.getDefaultToolkit().getImage("./images/gamegamen.png");break;
-                case 2:img = Toolkit.getDefaultToolkit().getImage("./images/gameclear.png");break;
-                case 3:img = Toolkit.getDefaultToolkit().getImage("./images/gameover.png");break;
+                case 1:this.img = Toolkit.getDefaultToolkit().getImage("./images/gamegamen.png");break;
+                case 2:this.img = Toolkit.getDefaultToolkit().getImage("./images/gameclear.png");break;
+                case 3:this.img = Toolkit.getDefaultToolkit().getImage("./images/gameover.png");break;
             }
         }
 
         public void paint(Graphics g){
-            g.drawImage(this.img,this.x,this.y,500,500,this);
+            g.drawImage(this.img,0,0,500,500,this);
         }
     }
 
