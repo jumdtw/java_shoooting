@@ -50,16 +50,20 @@ public class Shooting{
         //描画時間　fps的なもの
         int sleep_time = 10;
         //敵が画面にいる時間
-        int enemy_alive_time = 10;
+        int enemy_alive_time = 5;
         //打ち出した弾の個数
         int shoted_tama_counter = 0;
+        //必要単位数
+        int limit_point;
         //スコア
         int score;
         //制限時間
         int limit_time;
         //現在までの経過時間
         int count_time;
-
+        JLabel ten;
+        //背景画像
+        BackGround background;
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
@@ -67,10 +71,14 @@ public class Shooting{
             jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
+            limit_point = 64;
+            score = 0;
+            ten = new JLabel();
+            background = new BackGround(1);
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            limit_time = 5;
+            limit_time = 10;
             count_time = 0;
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
             setFocusable(true);
@@ -78,6 +86,8 @@ public class Shooting{
             add(startbutton);
         }
 
+
+        //画面を初期化　何も表示させないようにしている
         public void init(){
             jiki = new Jiki(-9999,-9999);
             tama = new Tama(-1000,-1000);
@@ -90,7 +100,6 @@ public class Shooting{
 
         public void run(){
             for(;;){
-
                 //ランダムに敵を出現させる
                 get_enemy();
                 //キーイベントを取得し、自機を動かす
@@ -109,8 +118,8 @@ public class Shooting{
                     }
                 }
                 repaint();
+
                 count_time += sleep_time;
-                System.out.println(count_time/100);
                 if(count_time >= sleep_time * 100 * limit_time){
                     init();
                     end_game();
@@ -158,6 +167,7 @@ public class Shooting{
                 if(hit_xdistance > xdistance){
                     tama.remove();
                     teki.seter_enemy_time(enemy_alive_time);
+                    score += teki.enemy_point;
                 }
             }
         }
@@ -165,6 +175,11 @@ public class Shooting{
         public void end_game(){
             removeAll();
             repaint();
+            if(score >= limit_point){
+                background = new BackGround(2);
+            }else{
+                background = new BackGround(3);
+            }
             ReturnButton b = new ReturnButton();
             add(b);
         }
@@ -215,6 +230,7 @@ public class Shooting{
             jiki = new Jiki(250,400);
             tama = new Tama(-1000,-1000);
             tekis = new Teki[max_enemy_num];
+            background = new BackGround(1);
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
@@ -230,6 +246,7 @@ public class Shooting{
         public void return_menu(){
             removeAll();
             repaint();
+            background = new BackGround(1);
             StartButton b = new StartButton();
             add(b);
         }
@@ -263,6 +280,8 @@ public class Shooting{
             //画面背景を黒にぬりつぶす
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
+            //背景画像
+            g.drawImage(background.img,0,0,500,500,this);
             //自機の初期描画
             Image image = jiki.get_jiki_img();
             int px = jiki.get_jiki_x();
@@ -285,10 +304,30 @@ public class Shooting{
                     g.drawImage(image,px,py,image_size,image_size,this);
                 }
             }
+            //得点の表示
+            g.setColor(Color.white);
+            g.drawString("単位数: " + String.valueOf(score),10,15);
+            g.drawString("残り時間: " + String.valueOf(limit_time-count_time/1000),10,30);
         }
     }
 
-    
+
+    public class BackGround extends Canvas{
+        int x;
+        int y;
+        Image img;
+        BackGround(int flag){
+            switch(flag){
+                case 1:img =  Toolkit.getDefaultToolkit().getImage("./images/.png");break;
+                case 2:img = Toolkit.getDefaultToolkit().getImage("./images/gameclear.png");break;
+                case 3:img = Toolkit.getDefaultToolkit().getImage("./images/gameover.png");break;
+            }
+        }
+
+        public void paint(Graphics g){
+            g.drawImage(this.img,this.x,this.y,500,500,this);
+        }
+    }
 
     //自機クラス
     public class Jiki extends Canvas{
