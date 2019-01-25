@@ -1,10 +1,10 @@
 import java.awt.Graphics;
-import java.applet.Applet;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.Canvas;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,7 +30,9 @@ public class Shooting{
 
         public GameWindow(String title,int width,int height){
             super(title);
+            //右上✖ボタンでウィンドウを消す
             setDefaultCloseOperation(EXIT_ON_CLOSE);
+            //ウィンドウの大きさ
             setSize(width,height);
             setLocationRelativeTo(null);
             setResizable(false);
@@ -80,17 +82,17 @@ public class Shooting{
 
         public void run(){
             for(;;){
-                //
+                //ランダムに敵を出現させる
                 get_enemy();
-                //
+                //キーイベントを取得し、自機を動かす
                 jiki.update(keyleft,keyright);
-                //
+                //弾がウィンドウ内にあった場合updateを実行する
                 if(tama.get_Tama_y()>-90&&tama.get_Tama_y()<500){tama.update();}
-                //
+                //配列内の敵がnull(空)でなかったらupdateする
                 for(int i=0;i<tekis.length;i++){
                     if(tekis[i]!=null){
                         tekis[i].update();
-                        //tekis[i].hit_judge(tama);
+                        hit_judge(tekis[i]);
                         //sleep している時間が0.01sなので*100で1sになる
                         if(tekis[i].get_enemy_time() >= sleep_time * 100 * enemy_alive_time){
                             tekis[i] = null;
@@ -110,14 +112,18 @@ public class Shooting{
             for(int i=0;i<tekis.length;i++){
                 if(tekis[i]==null){
                     Random rand = new Random();
-                    // 0 ~ 100
-                    int num = rand.nextInt(100);
-                    if(num%1==0){
+                    // 1/100の確率で敵が出現する
+                    int num = rand.nextInt(150);
+                    if(num==0){
                         tekis[i] = new Teki(sleep_time);
                     }
                     
                 }
             }
+        }
+
+        public void hit_judge(Teki teki){
+            
         }
 
         //
@@ -144,20 +150,24 @@ public class Shooting{
         public void keyTyped(KeyEvent e) {
         }
 
-        //
+        //画像の初期描画
         public void paintComponent(Graphics g) {
+            //画面背景を黒にぬりつぶす
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, getWidth(), getHeight());
+            //自機の初期描画
             Image image = jiki.get_jiki_img();
             int px = jiki.get_jiki_x();
             int py = jiki.get_jiki_y();
             int image_size = jiki.get_jiki_image_size();
             g.drawImage(image,px,py,image_size,image_size,this);
+            //自機弾の初期描画　最初は画面外側においてある
             image = tama.get_Tama_img();
             px = tama.get_Tama_x();
             py = tama.get_Tama_y();
             image_size = tama.get_tama_img_size();
             g.drawImage(image,px,py,image_size,image_size,this);
+            //敵画像の初期描画
             for(int i=0;i<tekis.length;i++){
                 if(tekis[i]!=null){
                     image = tekis[i].get_enemy_img();
@@ -171,11 +181,13 @@ public class Shooting{
     }
 
     //自機クラス
-    public class Jiki extends Applet{
-
+    public class Jiki extends Canvas{
+        //この座標は画像左上なので注意
         private int x;
         private int y;
+        //画像本体
         private Image img;
+        //自機画像の大きさ
         private int jiki_img_width_height;
 
         Jiki(){
@@ -205,7 +217,7 @@ public class Shooting{
             if(keyleft){this.x -= 5;}
             if(keyright){this.x += 5;}
             if(this.x<0){x = 0;}
-            if(this.x>500){x = 500;}
+            if(this.x>500-this.jiki_img_width_height){x = 500-this.jiki_img_width_height;}
         } 
         
 
@@ -215,23 +227,38 @@ public class Shooting{
     }
 
     //敵クラス
-    public class Teki extends Applet{
+    public class Teki extends Canvas{
+        //この座標は画像左上なので注意
         private int x;
         private int y;
+        //画像中心座標
+        private int center_px;
+        private int center_py;
+        //画像本体
         private Image img;
+        //生存時間
         private int time;
+        //敵の保持するポイント
+        private int enemy_point;
+        //敵画像の大きさ
         private int teki_img_width_height;
-        Random rand = new Random();
-        int num = rand.nextInt(10);
-        int count_time;
+        //生存時間のカウント用
+        private int count_time;
 
+        Random rand = new Random();
+        int num;
         Teki(int sleeptime){
-            this.x = rand.nextInt(500);
-            this.y = rand.nextInt(300);
             this.teki_img_width_height = 80;
-            time = 0;
-            count_time = sleeptime;
-            img = Toolkit.getDefaultToolkit().getImage("./images/maru.png");
+            this.x = rand.nextInt(500-teki_img_width_height);
+            this.y = rand.nextInt(300);
+            this.time = 0;
+            this.count_time = sleeptime;
+            num = rand.nextInt(3);
+            switch(num){
+                case 0: this.img = Toolkit.getDefaultToolkit().getImage("./images/maru.png");this.enemy_point=3;break;
+                case 1: this.img = Toolkit.getDefaultToolkit().getImage("./images/sannkaku.png");this.enemy_point=2;break;
+                case 2: this.img = Toolkit.getDefaultToolkit().getImage("./images/sikaku.png");this.enemy_point=1;break;
+            }
         }
 
         public int get_enemy_x(){
@@ -254,9 +281,15 @@ public class Shooting{
             return this.teki_img_width_height;
         }
 
-        public void hit_judge(Tama tama){
-
+        public int get_enemy_center_x(){
+            return this.center_px;
         }
+
+        public int get_enemy_center_y(){
+            return this.center_py;
+        }
+
+      
 
         //画面にいる時間をここで計測している
         public void update(){
@@ -274,11 +307,18 @@ public class Shooting{
 
 
     //弾クラス
-    public class Tama extends Applet{
+    public class Tama extends Canvas{
+        //この座標は画像左上なので注意
         private int x;
         private int y;
+        //画像中心座標
+        private int center_px;
+        private int center_py;
+        //弾の速度
         private int vy;
+        //弾画像本体
         private Image img;
+        //弾画像の大きさ
         private int tama_img_width_height;
 
         Tama(int px,int py){
@@ -286,6 +326,8 @@ public class Shooting{
             this.y = py;
             this.vy = 8;
             this.tama_img_width_height = 40;
+            this.center_px = this.x + this.tama_img_width_height/2;
+            this.center_py = this.y + this.tama_img_width_height/2;
             img = Toolkit.getDefaultToolkit().getImage("./images/test.png");
         }
         
@@ -304,10 +346,22 @@ public class Shooting{
             return this.tama_img_width_height;
         }
 
+        public int get_tama_center_x(){
+            return this.center_px;
+        }
+
+        public int get_tama_center_y(){
+            return this.center_py;
+        }
+
         //画面上方向への移動はマイナス
         public void update(){
             this.y -= vy;
         } 
+
+        public void remove(){
+            this.y = -9999;
+        }
         
         public void paint(Graphics g){
             g.drawImage(this.img,this.x,this.y,this.tama_img_width_height,this.tama_img_width_height,this);
