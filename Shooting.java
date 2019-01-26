@@ -79,9 +79,26 @@ public class Shooting{
         boolean gameFlag = true;
         //名前入力用のテキストフィールド
         JTextField nametext;
-        //
+        //テキストフィールドの場所
         int nametext_yposition = 150;
 
+        //画像と名前の場所
+        int number1_yposition = 9999;
+        int number2_yposition = 9999;
+        int number3_yposition = 9999;
+        //王冠の画像
+        Image number1_image = Toolkit.getDefaultToolkit().getImage("./images/1.png");;
+        Image number2_image = Toolkit.getDefaultToolkit().getImage("./images/2.png");;
+        Image number3_image = Toolkit.getDefaultToolkit().getImage("./images/3.png");;
+        //ランキング上位者のnickname
+        String number1_name = "default1";
+        String number2_name = "default2";
+        String number3_name = "default3";
+        //ランキング上位者の得点
+        int number1_score = 64;
+        int number2_score = 64;
+        int number3_score = 64;
+        
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
             //スタートボタンを生成
@@ -268,7 +285,7 @@ public class Shooting{
             }
             public void actionPerformed(ActionEvent e){
                 //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
-                read_ranking();
+                view_ranking();
             }
         }
 
@@ -305,9 +322,34 @@ public class Shooting{
             gameLoop.start();
         }
 
+        public void view_ranking(){
+            removeAll();
+            repaint();
+            background = new BackGround(1);
+            number1_yposition = 200;
+            number2_yposition = 270;
+            number3_yposition = 340;
+            nametext_yposition = 150;
+            ReturnButton b = new ReturnButton();
+            add(b);
+        }
+
         public void read_ranking(){
-            //removeAll();
-            //repaint();
+            try{
+
+            }catch(IOException ex){
+                //例外時処理
+                ex.printStackTrace();
+            }
+        }
+
+        public void write_ranking(){
+            try{
+
+            }catch(IOException ex){
+                //例外時処理
+                ex.printStackTrace();
+            }
         }
 
         public void return_menu(){
@@ -323,6 +365,9 @@ public class Shooting{
             //テキストフィールドのフォントと文字の太さを設定
             nametext.setFont(new Font("Dialog",Font.BOLD,14));
             background = new BackGround(1);
+            number1_yposition = 9999;
+            number2_yposition = 9999;
+            number3_yposition = 9999;
             StartButton sb = new StartButton();
             RankButton rb = new RankButton();
             add(sb);
@@ -400,6 +445,20 @@ public class Shooting{
             g.setFont(fo2);
             g.setColor(Color.yellow);
             g.drawString(nickname + " は " +  String.valueOf(score) + "の単位を取りました",print_score_char_xpositon,print_score_char_ypositon);
+            //ranking画面用
+            g.drawImage(number1_image,30,number1_yposition-40,45,45,this);
+            g.drawImage(number2_image,30,number2_yposition-40,45,45,this);
+            g.drawImage(number3_image,30,number3_yposition-40,45,45,this);
+            g.setFont(new Font("Dialog",Font.BOLD,30));
+            g.setColor(new Color(218,179,0));
+            g.drawString(number1_name,140,number1_yposition-3);
+            g.drawString(String.valueOf(number1_score),300,number1_yposition-3);
+            g.setColor(new Color(150,154,152));
+            g.drawString(number2_name,140,number2_yposition-3);
+            g.drawString(String.valueOf(number2_score),300,number2_yposition-3);
+            g.setColor(new Color(196,112,34));
+            g.drawString(number3_name,140,number3_yposition-3);
+            g.drawString(String.valueOf(number3_score),300,number3_yposition-3);
         }
     }
     ///////ここまでがmainpanelクラス
