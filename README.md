@@ -17,3 +17,6 @@ Javaでゲーム作りますが何か？ コード記述参考
 
 はじめてのJava入門 文字のフォントについて
 - http://www1.bbiq.jp/takeharu/Applet15.html
+
+javaプログラミング講座 textfeild
+- http://java.it-manual.com/application/jtextfield.html

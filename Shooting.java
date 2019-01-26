@@ -2,7 +2,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
+import java.io.*;
 import java.util.*;
 
 public class Shooting{
@@ -71,34 +71,59 @@ public class Shooting{
         //行間
         int print_char2char=15;
         //player name
-        String nickname = "Noname";
+        String nickname;
         //成績の文字列の場所
         int print_score_char_xpositon = 0;
         int print_score_char_ypositon = 999;
-
+        //threadを止めるためのフラッグ
         boolean gameFlag = true;
+        //名前入力用のテキストフィールド
+        JTextField nametext;
+        //
+        int nametext_yposition = 150;
 
         //mainのパネル　これをthread 処理することでキャラクター達を動かしている
         public MainPanel(){
+            //スタートボタンを生成
             startbutton = new StartButton();
+            //ランキングボタンを生成
             rankbutton = new RankButton();
+            //名前入力用のテキストフィールド生成 10文字まで
+            nametext = new JTextField(10);
+            //テキストフィールドの場所と大きさを設定
+            nametext.setBounds(250-150/2,nametext_yposition,150,30);
+            //テキストフィールドのフォントと文字の太さを設定
+            nametext.setFont(new Font("Dialog",Font.BOLD,14));
+            //自機の画像を画面買いに置きjikiクラスを初期化
             jiki = new Jiki(-9999,-9999);
+            //弾の画像を画面外に置きtamaクラスを初期化
             tama = new Tama(-1000,-1000);
+            //敵配列の大きさを設定
             tekis = new Teki[max_enemy_num];
+            //ゲームクリアに必要な点数
             limit_point = 1;
+            //スコアの初期化
             score = 0;
+            //背景画像をコーガ君のやつに設定
             background = new BackGround(1);
+            //敵配列の初期化
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-            limit_time = 10;
+            //制限時間
+            limit_time = 3;
+            //経過した時間
             count_time = 0;
+            //
             setPreferredSize(new Dimension(WIDTH, HEIGHT));
+            //
             setFocusable(true);
+            //キーイベントを受け付けるための設定
             addKeyListener(this);
+            //画面に描画
             add(startbutton);
             add(rankbutton);
-
+            add(nametext);
         }
 
 
@@ -111,7 +136,6 @@ public class Shooting{
             for(int i=0;i<tekis.length;i++){
                 tekis[i] = null;
             }
-     
         }
 
         public void run(){
@@ -191,7 +215,15 @@ public class Shooting{
         public void end_game(){
             removeAll();
             repaint();
-            if(score >= limit_point){
+            //名前が未入力の場合はNonameをnicknameに入れる
+            if(nametext.getText().toString().equals("")==true){
+                nickname = "Noname";
+            }else{
+                nickname = nametext.getText();
+            }
+            nametext_yposition = 9999;
+            //名前が未入力の場合は残八になる
+            if(score >= limit_point && nickname!="Noname"){
                 //成績発表用の文字列を表示
                 print_score_char_xpositon = 80;
                 print_score_char_ypositon = 160;
@@ -204,6 +236,14 @@ public class Shooting{
             ReturnButton b = new ReturnButton();
             add(b);
         }
+
+        //----------------------------------------------------------------------------------        
+        //----------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------
+        //-------------------------------button---------------------------------------------
+        //----------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------
+
 
         //startbuttonクラス
         public class StartButton extends JButton implements ActionListener{
@@ -258,7 +298,8 @@ public class Shooting{
             }
             count_time = 0;
             score = 0;
-            nickname = "Noname";
+            nickname = nametext.getText();
+            nametext_yposition = 9999;
             gameFlag = true;
             gameLoop = new Thread(this);
             gameLoop.start();
@@ -274,14 +315,30 @@ public class Shooting{
             repaint();
             //成績発表用の文字列の場所を画面外にする
             print_score_char_ypositon = 999;
+            nametext_yposition = 150;
+            //名前入力用のテキストフィールド生成 10文字まで
+            nametext = new JTextField(10);
+            //テキストフィールドの場所と大きさを設定
+            nametext.setBounds(250-150/2,nametext_yposition,150,30);
+            //テキストフィールドのフォントと文字の太さを設定
+            nametext.setFont(new Font("Dialog",Font.BOLD,14));
             background = new BackGround(1);
             StartButton sb = new StartButton();
             RankButton rb = new RankButton();
             add(sb);
             add(rb);
+            add(nametext);
         }
 
-        //
+        //----------------------------------------------------------------------------------        
+        //----------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------
+        //-------------------------------button---------------------------------------------
+        //----------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------
+
+
+        //キーボード押し込み時処理
         public void keyPressed(KeyEvent e){
             int keyCode = e.getKeyCode();
             if(keyCode == KeyEvent.VK_LEFT){keyleft=true;}
@@ -294,7 +351,7 @@ public class Shooting{
             }
         } 
 
-        //
+        //キーボードを話した時の処理
         public void keyReleased(KeyEvent e){
             int keyCode = e.getKeyCode();
             if(keyCode == KeyEvent.VK_LEFT){keyleft=false;}
@@ -345,6 +402,7 @@ public class Shooting{
             g.drawString(nickname + " は " +  String.valueOf(score) + "の単位を取りました",print_score_char_xpositon,print_score_char_ypositon);
         }
     }
+    ///////ここまでがmainpanelクラス
 
 
     public class BackGround extends Canvas{
