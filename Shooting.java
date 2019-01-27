@@ -250,6 +250,8 @@ public class Shooting{
                 print_score_char_ypositon = 140;
                 background = new BackGround(3);
             }
+            //write_ranking();
+            read_ranking();
             ReturnButton b = new ReturnButton();
             add(b);
         }
@@ -334,9 +336,57 @@ public class Shooting{
             add(b);
         }
 
+
+
+        /*
+        csvfile format
+
+        rank,name,score
+        1,A,64
+        2,B,63
+        3,C,62
+           .
+           .
+           .
+           .
+
+
+        rank
+        name
+        score
+        1
+        default1
+        64
+        2
+        default2
+        63
+        3
+        default3
+        62
+        */
         public void read_ranking(){
             try{
-
+                //出力先を作成する
+                File f = new File("rank.csv"); 
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                String line;
+                int c = 0;
+                // 1行ずつCSVファイルを読み込む
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",", 0); // 行をカンマ区切りで配列に変換
+                    for (String elem: data) {
+                        if(c==4){number1_name = elem;}
+                        if(c==5){number1_score = Integer.valueOf(elem).intValue();}
+                        if(c==7){number2_name = elem;}
+                        if(c==8){number2_score = Integer.valueOf(elem).intValue();}
+                        if(c==10){number3_name = elem;}
+                        if(c==11){number3_score = Integer.valueOf(elem).intValue();}
+                        if(c>=12){break;}
+                        c++;
+                    }
+                }
+                //ファイルに書き出す
+                br.close();
             }catch(IOException ex){
                 //例外時処理
                 ex.printStackTrace();
@@ -345,7 +395,11 @@ public class Shooting{
 
         public void write_ranking(){
             try{
-
+                //出力先を作成する
+                FileWriter fw = new FileWriter("rank.csv", false); 
+                PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
+                //ファイルに書き出す
+                pw.close();
             }catch(IOException ex){
                 //例外時処理
                 ex.printStackTrace();
