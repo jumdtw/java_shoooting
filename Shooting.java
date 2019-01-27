@@ -55,6 +55,8 @@ public class Shooting{
         int enemy_alive_time = 5;
         //打ち出した弾の個数
         int shoted_tama_counter = 0;
+        //弾の制限　打ち出した瞬間にカウントしているため
+        int limit_shoot = 2;
         //必要単位数
         int limit_point;
         //スコア
@@ -81,7 +83,6 @@ public class Shooting{
         JTextField nametext;
         //テキストフィールドの場所
         int nametext_yposition = 150;
-
         //画像と名前の場所
         int number1_yposition = 9999;
         int number2_yposition = 9999;
@@ -175,8 +176,9 @@ public class Shooting{
                     }
                 }
                 repaint();
-
+                
                 count_time += sleep_time;
+                if(shoted_tama_counter == limit_shoot ){count_time += sleep_time * 100 * limit_time;}
                 if(count_time >= sleep_time * 100 * limit_time){
                     init();
                     end_game();
@@ -317,6 +319,7 @@ public class Shooting{
             }
             count_time = 0;
             score = 0;
+            shoted_tama_counter = 0;
             nickname = nametext.getText();
             nametext_yposition = 9999;
             gameFlag = true;
@@ -713,9 +716,6 @@ public class Shooting{
             this.time += count_time;
         }
 
-        public void remove(){
-
-        }
 
         public void paint(Graphics g){
             g.drawImage(this.img,this.x,this.y,this.teki_img_width_height,this.teki_img_width_height,this);
