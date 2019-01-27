@@ -128,7 +128,7 @@ public class Shooting{
                 tekis[i] = null;
             }
             //制限時間
-            limit_time = 3;
+            limit_time = 7;
             //経過した時間
             count_time = 0;
             //
@@ -250,8 +250,7 @@ public class Shooting{
                 print_score_char_ypositon = 140;
                 background = new BackGround(3);
             }
-            //write_ranking();
-            read_ranking();
+            write_ranking();
             ReturnButton b = new ReturnButton();
             add(b);
         }
@@ -287,6 +286,7 @@ public class Shooting{
             }
             public void actionPerformed(ActionEvent e){
                 //アクションイベント(ボタンが押される)が発生すると、このactionPerformed メソッドが呼び出される
+                read_ranking();
                 view_ranking();
             }
         }
@@ -389,19 +389,78 @@ public class Shooting{
                 br.close();
             }catch(IOException ex){
                 //例外時処理
+                System.out.print("read");
                 ex.printStackTrace();
             }
         }
 
         public void write_ranking(){
             try{
+                //読み込みを行いランキング何位か探す
+                //出力先を作成する
+                File f = new File("rank.csv"); 
+                BufferedReader br = new BufferedReader(new FileReader(f));
+                String line;
+                String[] bufstr = new String[1000];
+                int new_ranker=0;
+                int new_score=0;
+                int diff = 0;
+                int c = 0;
+                // 1行ずつCSVファイルを読み込む
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",", 0); // 行をカンマ区切りで配列に変換
+                    for (String elem: data) {
+                        if((c+1)%3==0&&(c+1)!=3){
+                            if(Integer.valueOf(elem).intValue() <= score&&new_score==0){
+                                new_ranker = c/3;
+                                new_score = score;
+                            }
+                        }
+                        //書き込み用にすべての文字列を格納する
+                        bufstr[c] = elem;
+                        c++;
+                    }
+                }
+                //ファイルに書き出す
+                br.close();
+                
+                if(new_ranker==0){
+                    new_ranker = c/3;
+                    new_score = score;
+                }
+
                 //出力先を作成する
                 FileWriter fw = new FileWriter("rank.csv", false); 
                 PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
+                for(int i=0;i<1000;i+=3){
+                    if(bufstr[i]==null){break;}
+                    if(i==0){
+                        pw.print("rank");pw.print(",");
+                        pw.print("name");pw.print(",");
+                        pw.print("score");pw.println();
+                    }else if(i>=3){
+                        if((i/3)==new_ranker){
+                            pw.print(i/3);pw.print(",");
+                            pw.print(nickname);pw.print(",");
+                            pw.print(new_score);pw.println();
+                            diff = 1;
+                        }
+                        
+                        pw.print(Integer.valueOf(bufstr[i]).intValue() + diff);pw.print(",");
+                        pw.print(bufstr[i+1]);pw.print(",");
+                        pw.print(bufstr[i+2]);pw.println();
+                    }
+                }
+                if(diff==0){
+                    pw.print(new_ranker);pw.print(",");
+                    pw.print(nickname);pw.print(",");
+                    pw.print(new_score);pw.println();
+                }
                 //ファイルに書き出す
                 pw.close();
             }catch(IOException ex){
                 //例外時処理
+                
                 ex.printStackTrace();
             }
         }
